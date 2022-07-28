@@ -3,10 +3,12 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+# from PIL import Image
+
 
 class Genre(models.Model):
     """Genre model"""
-    
+
     name = models.CharField(verbose_name=_('name'),
                             max_length=150,
                             db_index=True,
@@ -30,7 +32,7 @@ class Genre(models.Model):
 
 class Video(models.Model):
     """Video model"""
-    
+
     PRIVATE = 'PR'
     PUBLIC = 'PU'
     PRIVACY_CHOICES = [
@@ -61,7 +63,6 @@ class Video(models.Model):
     video_file = models.FileField(verbose_name=_('Video file'),
                                   upload_to='videos',
                                   help_text=_('Path to the uploaded video.'))
-    # ToDo: Autogenerate thumbnail
     thumbnail = models.ImageField(verbose_name=_('thumbnail'),
                                   upload_to='thumbnails',
                                   help_text=_('An image that will be used as a thumbnail.'))
@@ -79,15 +80,14 @@ class Video(models.Model):
                                                  default=0,
                                                  help_text=_('View count for a video.'))
     genre = models.ManyToManyField(Genre,
-                              on_delete=models.PROTECT,
-                              related_name=_('videos'),
-                              verbose_name=_('genre'),
-                              blank=True)
+                                   on_delete=models.PROTECT,
+                                   related_name=_('videos'),
+                                   verbose_name=_('genre'),
+                                   blank=True)
     released = models.DateField(blank=True, null=True)
     enable_comments = models.BooleanField(verbose_name=_('enable comments'),
                                           default=True,
                                           help_text=_('Flag to turn on/off commenting'))
-    # enable_downloads
     created = models.DateTimeField(verbose_name=_('created'),
                                    auto_now_add=True,
                                    help_text=_('The date/time when the user uploaded the video'))
@@ -100,9 +100,13 @@ class Video(models.Model):
                                        blank=True,
                                        null=True,
                                        help_text=_('Users who added video to their favorites.'))
-    # video_length
-    # tags
-    # flag(ged)
+    video_length = models.CharField(verbose_name=_('video length'),
+                                    max_length=10,
+                                    help_text=_('Length of the video in minutes:seconds'),
+                                    blank=True)
+    flag = models.BooleanField(verbose_name=_('_is flagged?'),
+                               default=False,
+                               help_text=_('If this video has been flagged for violations'))
 
     class Meta:
         ordering = ['-created']
@@ -111,3 +115,17 @@ class Video(models.Model):
 
     def get_absolute_url(self):
         return reverse('video_detail', kwargs={'slug': self.slug})
+
+    def __str__(self):
+        return self.title
+
+    # Untested code
+    # def save(self, *args, **kwargs):
+    #     super().save(*args, **kwargs)
+
+    #     thumb = Image.open(self.thumbnail.path)
+
+    #     if thumb.height > 300 or thumb.width > 300:
+    #         output_size = (300, 300)
+    #         thumb.thumbnail(output_size)
+    #         thumb.save(self.thumbnail.path)
