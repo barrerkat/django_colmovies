@@ -78,7 +78,7 @@ class Video(models.Model):
     impressions = models.PositiveBigIntegerField(verbose_name=_('impressions'),
                                                  default=0,
                                                  help_text=_('View count for a video.'))
-    genre = models.ManyToManyField(Genre,
+    genre = models.ForeignKey(Genre,
                               on_delete=models.PROTECT,
                               related_name=_('videos'),
                               verbose_name=_('genre'),
